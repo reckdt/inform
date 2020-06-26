@@ -1,41 +1,27 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
-	"time"
 )
 
 const title string = "Inform.lol"
 
 // index
 func Index(w http.ResponseWriter, r *http.Request) {
-
-	//	cookie, err := r.Cookie("username")
-	//	if err != nil {
-	//		fmt.Println("no cookie")
-	//	} else {
-	//		fmt.Println(cookie.Value)
-	//	}
-
+	if r.URL.Path != "/" {
+		errorHandler(w, r, http.StatusNotFound)
+		return
+	}
 	fmt.Fprintf(w, "This is the index.")
 }
 
-func getUsernameAndSessionId(r *http.Request) (string, string, error) {
-	cookie, err := r.Cookie("username")
-	if err != nil {
-		return "", "", errors.New("No username cookie")
+// error handler
+func errorHandler(w http.ResponseWriter, r *http.Request, status int) {
+	w.WriteHeader(status)
+	if status == http.StatusNotFound {
+		fmt.Fprint(w, "404 Page Not Found.")
 	}
-	username := cookie.Value
-
-	cookie, err = r.Cookie("sessionId")
-	if err != nil {
-		return "", "", errors.New("No session id cookie")
-	}
-	sessionId := cookie.Value
-
-	return username, sessionId, nil
 }
 
 // signup
@@ -96,23 +82,6 @@ func Login(w http.ResponseWriter, r *http.Request) {
 func getUserNameAndPassword(r *http.Request) (string, string) {
 	r.ParseForm()
 	return r.PostForm.Get("username"), r.PostForm.Get("password")
-}
-
-func createSessionAndCookies(w http.ResponseWriter, username string) {
-	sessionId := getSessionId()
-	addSession(sessionId, username)
-
-	addCookie(w, "username", username, 60*time.Minute)
-	addCookie(w, "sessionId", sessionId, 60*time.Minute)
-}
-
-func removeSessionAndCookies(w http.ResponseWriter, r *http.Request) {
-	username, sessionId, err := getUsernameAndSessionId(r)
-	if err == nil {
-		removeSession(sessionId, username)
-	}
-	removeCookie(w, "username")
-	removeCookie(w, "sessionId")
 }
 
 //logoff

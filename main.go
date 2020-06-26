@@ -7,7 +7,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"time"
 )
 
 var db *sql.DB
@@ -20,7 +19,7 @@ func main() {
 	http.HandleFunc("/signup", Signup)
 	http.HandleFunc("/login", Login)
 	http.HandleFunc("/logoff", Logoff)
-	http.HandleFunc("/account", Account)
+	http.HandleFunc("/account", auth(Account))
 
 	initDb()
 
@@ -35,25 +34,4 @@ func initDb() {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func addCookie(w http.ResponseWriter, name string, value string, ttl time.Duration) {
-	expires := time.Now().Add(ttl)
-	cookie := http.Cookie{
-		Name:     name,
-		Value:    value,
-		Expires:  expires,
-		HttpOnly: true,
-	}
-	http.SetCookie(w, &cookie)
-}
-
-func removeCookie(w http.ResponseWriter, name string) {
-	cookie := http.Cookie{
-		Name:     name,
-		Value:    "",
-		Expires:  time.Unix(0, 0),
-		HttpOnly: true,
-	}
-	http.SetCookie(w, &cookie)
 }
