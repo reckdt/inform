@@ -3,6 +3,9 @@ package main
 import (
 	"errors"
 	"golang.org/x/crypto/bcrypt"
+	"os/exec"
+	"strings"
+	"time"
 )
 
 func addUser(username string, password string) error {
@@ -46,4 +49,28 @@ func getHashedPassword(password string) string {
 		panic(err)
 	}
 	return string(hashedPassword)
+}
+
+func getSessionId() string {
+	out, err := exec.Command("uuidgen").Output()
+	if err != nil {
+		panic(err)
+	}
+	return strings.TrimSpace(string(out))
+}
+
+func addSession(sessionId string, username string) error {
+	_, err := db.Exec("INSERT INTO sessions VALUES ($1, $2, $3)", sessionId, username, time.Now())
+	if err != nil {
+		return errors.New("Error adding session.")
+	}
+	return nil
+}
+
+func removeSession(sessionId string, username string) error {
+	_, err := db.Exec("DELETE FROM sessions WHERE id = $1 AND username = $2", sessionId, username)
+	if err != nil {
+		return errors.New("Error removing session.")
+	}
+	return nil
 }

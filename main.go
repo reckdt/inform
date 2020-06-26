@@ -19,6 +19,7 @@ func main() {
 	http.HandleFunc("/", Index)
 	http.HandleFunc("/signup", Signup)
 	http.HandleFunc("/login", Login)
+	http.HandleFunc("/logoff", Logoff)
 	http.HandleFunc("/account", Account)
 
 	initDb()
@@ -39,9 +40,20 @@ func initDb() {
 func addCookie(w http.ResponseWriter, name string, value string, ttl time.Duration) {
 	expires := time.Now().Add(ttl)
 	cookie := http.Cookie{
-		Name:    name,
-		Value:   value,
-		Expires: expires,
+		Name:     name,
+		Value:    value,
+		Expires:  expires,
+		HttpOnly: true,
+	}
+	http.SetCookie(w, &cookie)
+}
+
+func removeCookie(w http.ResponseWriter, name string) {
+	cookie := http.Cookie{
+		Name:     name,
+		Value:    "",
+		Expires:  time.Unix(0, 0),
+		HttpOnly: true,
 	}
 	http.SetCookie(w, &cookie)
 }
