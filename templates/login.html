@@ -1,0 +1,24 @@
+{{template "header" . }}
+<div class="container">
+  <h2>Login</h2>
+  <br>
+  <form method="post">
+    <div class="form-group">
+      <label for="username">Username:</label>
+      <input type="username" class="form-control" id="username" name="username" value="{{ .Username }}">
+    </div>
+    <div class="form-group">
+      <label for="password">Password:</label>
+      <input type="password" class="form-control" id="password" name="password" value="{{ .Password }}">
+    </div>
+    {{ if .ErrMsg }}
+    <div class="text-danger">*{{ .ErrMsg }}</div>
+    <br>
+    {{ end }}
+    <button type="submit" class="btn btn-primary">Login</button>
+  </form>
+</div>
+
+</body>
+</html>
+
