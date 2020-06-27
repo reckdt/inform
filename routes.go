@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-const title string = "Inform.lol"
+const title string = "inform.lol"
 
 // index
 func Index(w http.ResponseWriter, r *http.Request) {
@@ -13,7 +13,11 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		errorHandler(w, r, http.StatusNotFound)
 		return
 	}
-	fmt.Fprintf(w, "This is the index.")
+	p := AuthPage{
+		Title: title,
+	}
+
+	templates.ExecuteTemplate(w, "index.html", p)
 }
 
 // error handler
@@ -100,9 +104,10 @@ type AccountPage struct {
 
 func Account(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
+		username := r.Context().Value("username").(string)
 		p := AccountPage{
 			Title:    title,
-			Username: "ryan",
+			Username: username,
 		}
 		templates.ExecuteTemplate(w, "account.html", p)
 	}

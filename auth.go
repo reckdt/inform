@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
@@ -16,6 +17,9 @@ func auth(h http.HandlerFunc) http.HandlerFunc {
 		if err != nil || !verifySession(sessionId, username) {
 			http.Redirect(w, r, "/login", 302)
 		} else {
+			ctx := r.Context()
+			ctx = context.WithValue(ctx, "username", username)
+			r = r.WithContext(ctx)
 			h.ServeHTTP(w, r)
 		}
 	}
