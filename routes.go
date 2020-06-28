@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"net/url"
+	"strings"
 )
 
 type Page struct {
@@ -14,18 +16,28 @@ func (p Page) Title() string {
 }
 
 // index
+type IndexPage struct {
+	Page
+	Posts []UserPost
+}
+
 func Index(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		errorHandler(w, r, http.StatusNotFound)
 		return
 	}
-	p := AuthPage{}
+	p := IndexPage{}
 	p.Username = getUsername(r)
-
 	posts := getPosts()
-	for _, p := range posts {
-		println(p.Url)
+	for i := 0; i < len(posts); i++ {
+		u, err := url.Parse(posts[i].Url)
+		if err != nil {
+			panic(err)
+		}
+		posts[i].Host = strings.ReplaceAll(u.Host, "www.", "")
 	}
+	p.Posts = posts
+
 	templates.ExecuteTemplate(w, "index.html", p)
 }
 

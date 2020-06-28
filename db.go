@@ -14,6 +14,7 @@ type UserPost struct {
 	Url      string
 	Text     string
 	Posted   time.Time
+	Host     string
 }
 
 type UserComment struct {
