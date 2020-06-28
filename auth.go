@@ -25,6 +25,19 @@ func auth(h http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+// middleware
+func middleware(h http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		username, sessionId, err := getUsernameAndSessionId(r)
+		if err == nil && verifySession(sessionId, username) {
+			ctx := r.Context()
+			ctx = context.WithValue(ctx, "username", username)
+			r = r.WithContext(ctx)
+		}
+		h.ServeHTTP(w, r)
+	}
+}
+
 func addCookie(w http.ResponseWriter, name string, value string, ttl time.Duration) {
 	expires := time.Now().Add(ttl)
 	cookie := http.Cookie{

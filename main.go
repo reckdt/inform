@@ -18,11 +18,12 @@ func main() {
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	http.HandleFunc("/", Index)
-	http.HandleFunc("/signup", Signup)
-	http.HandleFunc("/login", Login)
+	http.HandleFunc("/", middleware(Index))
+	http.HandleFunc("/signup", middleware(Signup))
+	http.HandleFunc("/login", middleware(Login))
 	http.HandleFunc("/logoff", Logoff)
 	http.HandleFunc("/account", auth(Account))
+	http.HandleFunc("/post", auth(Post))
 
 	initDb()
 

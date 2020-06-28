@@ -15,9 +15,27 @@
 
 <nav class="navbar navbar-expand-sm bg-dark navbar-dark sticky-top">
   <a class="navbar-brand" href="/">{{ .Title }}</a>
+   <ul class="navbar-nav">
+    <li class="nav-item">
+      <a class="nav-link" href="/post">post</a>
+    </li>
+  </ul> 
   <ul class="nav navbar-nav ml-auto">
-    <a class="btn btn-outline-secondary mr-1" href="/login">log in</a>
-    <a class="btn btn-secondary" href="/signup">sign up</a>
+    {{ if .Username }}
+      <li class="nav-item">
+        <a class="nav-link disabled" href="/account">hello, {{ .Username }}.</a>
+      </li>
+      <li>
+        <a class="btn btn-outline-secondary mr-1" href="/logoff">log off</a>
+      </li>
+    {{ else }}
+      <li>
+        <a class="btn btn-outline-secondary mr-1" href="/login">log in</a>
+      </li>
+      <li>
+        <a class="btn btn-secondary" href="/signup">sign up</a>
+      </li>
+    {{ end }}
   <ul class="nav navbar-nav ml-auto">
 </nav>
 <br>

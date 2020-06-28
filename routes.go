@@ -5,7 +5,13 @@ import (
 	"net/http"
 )
 
-const title string = "inform.lol"
+type Page struct {
+	Username string
+}
+
+func (p Page) Title() string {
+	return "inform.lol"
+}
 
 // index
 func Index(w http.ResponseWriter, r *http.Request) {
@@ -13,10 +19,13 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		errorHandler(w, r, http.StatusNotFound)
 		return
 	}
-	p := AuthPage{
-		Title: title,
-	}
+	p := AuthPage{}
+	p.Username = getUsername(r)
 
+	posts := getPosts()
+	for _, p := range posts {
+		println(p.Url)
+	}
 	templates.ExecuteTemplate(w, "index.html", p)
 }
 
@@ -30,7 +39,7 @@ func errorHandler(w http.ResponseWriter, r *http.Request, status int) {
 
 // signup
 type AuthPage struct {
-	Title    string
+	Page
 	ErrMsg   string
 	Username string
 	Password string
@@ -38,14 +47,13 @@ type AuthPage struct {
 
 func Signup(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		p := AuthPage{Title: title}
+		p := AuthPage{}
 		templates.ExecuteTemplate(w, "signup.html", p)
 	} else if r.Method == "POST" {
 		username, password := getUserNameAndPassword(r)
 		err := addUser(username, password)
 		if err != nil {
 			p := AuthPage{
-				Title:    title,
 				ErrMsg:   err.Error(),
 				Username: username,
 				Password: password,
@@ -62,14 +70,13 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 // login
 func Login(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		p := AuthPage{Title: title}
+		p := AuthPage{}
 		templates.ExecuteTemplate(w, "login.html", p)
 	} else if r.Method == "POST" {
 		username, password := getUserNameAndPassword(r)
 		err := verifyUser(username, password)
 		if err != nil {
 			p := AuthPage{
-				Title:    title,
 				ErrMsg:   err.Error(),
 				Username: username,
 				Password: password,
@@ -98,17 +105,62 @@ func Logoff(w http.ResponseWriter, r *http.Request) {
 
 // account
 type AccountPage struct {
-	Title    string
-	Username string
+	Page
 }
 
 func Account(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		username := r.Context().Value("username").(string)
-		p := AccountPage{
-			Title:    title,
-			Username: username,
-		}
+		p := AccountPage{}
+		p.Username = getUsername(r)
 		templates.ExecuteTemplate(w, "account.html", p)
 	}
+}
+
+// post
+type PostPage struct {
+	Page
+	ErrMsg    string
+	PostTitle string
+	Url       string
+	Text      string
+}
+
+func Post(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		p := PostPage{}
+		p.Username = getUsername(r)
+		templates.ExecuteTemplate(w, "post.html", p)
+	} else if r.Method == "POST" {
+		r.ParseForm()
+		title := r.PostForm.Get("title")
+		url := r.PostForm.Get("url")
+		text := r.PostForm.Get("text")
+		post := UserPost{
+			Title:    trim(title),
+			Url:      trim(url),
+			Text:     trim(text),
+			Username: getUsername(r),
+		}
+		err := addPost(post)
+		if err != nil {
+			p := PostPage{
+				ErrMsg:    err.Error(),
+				PostTitle: title,
+				Url:       url,
+				Text:      text,
+			}
+			templates.ExecuteTemplate(w, "post.html", p)
+			return
+		}
+		http.Redirect(w, r, "/", 302)
+	}
+}
+
+// gets username from context
+func getUsername(r *http.Request) string {
+	username, ok := r.Context().Value("username").(string)
+	if !ok {
+		return ""
+	}
+	return username
 }

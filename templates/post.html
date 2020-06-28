@@ -1,0 +1,29 @@
+{{template "header" . }}
+<div class="container">
+  <h4>Post</h4>
+  <br>
+  <form method="post">
+    <div class="form-group">
+      <label for="title">Title:</label>
+      <input type="text" name="title" class="form-control" id="title" value="{{ .PostTitle }}">
+    </div>
+    <div class="form-group">
+      <label for="url">Url:</label>
+      <input type="text" name="url" class="form-control" id="url" value="{{ .Url }}">
+    </div>
+    <div class="form-group">
+      <label for="comment">Text:</label>
+      <textarea class="form-control" rows="5" name="text" id="text">{{ .Text }}</textarea>
+    </div>
+    {{ if .ErrMsg }}
+      <div class="text-danger">*{{ .ErrMsg }}</div>
+      <br>
+    {{ end }}
+    <br>
+    <button type="submit" class="btn btn-dark btn-block btn-lg">Post</button>
+  </form>
+</div>
+
+</body>
+</html>
+
